@@ -1,5 +1,5 @@
 trigger:
-  - master
+  - azure-pipelines-withKubernetes
 pool:
   vmImage: Ubuntu-16.04
 steps:
@@ -10,7 +10,15 @@ steps:
   - script: |
       npm install
       npm run build
-      docker build -t $(dockerId).azurecr.io/$(imageName) .
-      docker login -u $(dockerId) -p $(dockerPassword) $(dockerId).azurecr.io
-      docker push $(dockerId).azurecr.io/$(imageName)
+  - task: DockerCompose@0
+    inputs:
+      azureSubscriptionEndpoint: 'Azure for Students(e9122c58-941a-4646-8e7c-aadf7be91202)'
+      azureContainerRegistry: '{"loginServer":"jamcamdockerkubernetes.azurecr.io", "id" : "/subscriptions/e9122c58-941a-4646-8e7c-aadf7be91202/resourceGroups/JamCamDockerKubernetes/providers/Microsoft.ContainerRegistry/registries/JamCamDockerKubernetes"}'
+      action: 'Build services'
+      includeLatestTag: true
+  - task: DockerCompose@0
+    inputs:
+      azureSubscriptionEndpoint: 'Azure for Students(e9122c58-941a-4646-8e7c-aadf7be91202)'
+      azureContainerRegistry: '{"loginServer":"jamcamdockerkubernetes.azurecr.io", "id" : "/subscriptions/e9122c58-941a-4646-8e7c-aadf7be91202/resourceGroups/JamCamDockerKubernetes/providers/Microsoft.ContainerRegistry/registries/JamCamDockerKubernetes"}'
+      action: 'Push services'
 
